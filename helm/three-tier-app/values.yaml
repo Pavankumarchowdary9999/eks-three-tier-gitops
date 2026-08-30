@@ -1,0 +1,95 @@
+# Default values for the three-tier-app chart.
+# This is a learning project — all values are overridable via
+#   helm install ... -f my-values.yaml   or   --set key=value
+
+namespace:
+  name: three-tier-app
+
+# ---------------------------------------------------------------------------
+# Frontend (Nginx)
+# ---------------------------------------------------------------------------
+frontend:
+  replicaCount: 1
+  image:
+    repository: ""          # e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com/frontend
+    tag: "latest"
+    pullPolicy: Always
+  service:
+    type: LoadBalancer
+    port: 80
+    targetPort: 80
+  # The nginx config proxies /api to the backend. backendHost is the Service
+  # DNS name. In a single release it defaults to the generated backend service
+  # name, which is correct in the default single-chart install.
+  backendHost: ""
+  backendPort: 8080
+  probes:
+    enabled: true
+    readiness:
+      initialDelaySeconds: 5
+      periodSeconds: 10
+    liveness:
+      initialDelaySeconds: 10
+      periodSeconds: 15
+
+# ---------------------------------------------------------------------------
+# Backend (Spring Boot)
+# ---------------------------------------------------------------------------
+backend:
+  replicaCount: 1
+  image:
+    repository: ""          # e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com/backend
+    tag: "latest"
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  env:
+    # Leave empty values (unless overridden) so the ConfigMap/Secret are used.
+    DB_HOST: ""             # defaults to postgres service name
+    DB_PORT: ""
+    DB_NAME: ""
+    DB_USERNAME: ""
+    DB_PASSWORD: ""
+  probes:
+    enabled: true
+    readiness:
+      initialDelaySeconds: 15
+      periodSeconds: 10
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 15
+
+# ---------------------------------------------------------------------------
+# PostgreSQL
+# ---------------------------------------------------------------------------
+postgres:
+  replicaCount: 1
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5432
+    targetPort: 5432
+  config:
+    # These are the values the backend will use to connect to the DB.
+    DB_HOST: ""             # defaults to this postgres service name
+    DB_PORT: "5432"
+    DB_NAME: "itemsdb"
+    DB_USERNAME: "postgres"
+  secret:
+    DB_PASSWORD: "postgres"
+  storage:
+    enabled: true
+    size: "1Gi"
+  probes:
+    enabled: true
+    readiness:
+      initialDelaySeconds: 5
+      periodSeconds: 5
+    liveness:
+      initialDelaySeconds: 10
+      periodSeconds: 10

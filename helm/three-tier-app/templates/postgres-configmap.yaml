@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "three-tier-app.fullname" . }}-postgres
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: postgres
+    {{- include "three-tier-app.labels" . | nindent 4 }}
+data:
+  DB_HOST: {{ .Values.postgres.config.DB_HOST | default (printf "%s-postgres" (include "three-tier-app.fullname" .)) | quote }}
+  DB_PORT: {{ .Values.postgres.config.DB_PORT | default "5432" | quote }}
+  DB_NAME: {{ .Values.postgres.config.DB_NAME | quote }}
+  DB_USERNAME: {{ .Values.postgres.config.DB_USERNAME | quote }}

@@ -1,0 +1,16 @@
+{{- if .Values.postgres.storage.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "three-tier-app.fullname" . }}-postgres-data
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: postgres
+    {{- include "three-tier-app.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.postgres.storage.size }}
+{{- end }}

@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "three-tier-app.fullname" . }}-backend
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: backend
+    {{- include "three-tier-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: "{{ required "backend.image.repository is required (e.g. ECR URI)" .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.backend.service.targetPort }}
+          env:
+            {{- /* DB values come from the ConfigMap unless explicitly overridden in values */}}
+            - name: DB_HOST
+              {{- if .Values.backend.env.DB_HOST }}
+              value: {{ .Values.backend.env.DB_HOST | quote }}
+              {{- else }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "three-tier-app.fullname" . }}-postgres
+                  key: DB_HOST
+              {{- end }}
+            - name: DB_PORT
+              {{- if .Values.backend.env.DB_PORT }}
+              value: {{ .Values.backend.env.DB_PORT | quote }}
+              {{- else }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "three-tier-app.fullname" . }}-postgres
+                  key: DB_PORT
+              {{- end }}
+            - name: DB_NAME
+              {{- if .Values.backend.env.DB_NAME }}
+              value: {{ .Values.backend.env.DB_NAME | quote }}
+              {{- else }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "three-tier-app.fullname" . }}-postgres
+                  key: DB_NAME
+              {{- end }}
+            - name: DB_USERNAME
+              {{- if .Values.backend.env.DB_USERNAME }}
+              value: {{ .Values.backend.env.DB_USERNAME | quote }}
+              {{- else }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "three-tier-app.fullname" . }}-postgres
+                  key: DB_USERNAME
+              {{- end }}
+            - name: DB_PASSWORD
+              {{- if .Values.backend.env.DB_PASSWORD }}
+              value: {{ .Values.backend.env.DB_PASSWORD | quote }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "three-tier-app.fullname" . }}-postgres
+                  key: DB_PASSWORD
+              {{- end }}
+          {{- if .Values.backend.probes.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: {{ .Values.backend.service.targetPort }}
+            initialDelaySeconds: {{ .Values.backend.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.probes.readiness.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: {{ .Values.backend.service.targetPort }}
+            initialDelaySeconds: {{ .Values.backend.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.probes.liveness.periodSeconds }}
+          {{- end }}
