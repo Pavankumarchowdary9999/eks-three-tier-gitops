@@ -12,7 +12,7 @@ frontend:
   replicaCount: 1
   image:
     repository: "698387659728.dkr.ecr.ap-south-1.amazonaws.com/frontend"          # e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com/frontend
-    tag: ""
+    tag: "ee6e2a8bbb6498de5d4ba5558579cc3b99b36c08"
     pullPolicy: Always
   service:
     type: LoadBalancer
@@ -39,7 +39,7 @@ backend:
   replicaCount: 1
   image:
     repository: "698387659728.dkr.ecr.ap-south-1.amazonaws.com/backend"          # e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com/backend
-    tag: ""
+    tag: "ee6e2a8bbb6498de5d4ba5558579cc3b99b36c08"
     pullPolicy: Always
   service:
     type: ClusterIP
