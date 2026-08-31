@@ -11,8 +11,8 @@ namespace:
 frontend:
   replicaCount: 1
   image:
-    repository: ""          # e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com/frontend
-    tag: "latest"
+    repository: "698387659728.dkr.ecr.ap-south-1.amazonaws.com/frontend"          # e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com/frontend
+    tag: ""
     pullPolicy: Always
   service:
     type: LoadBalancer
@@ -38,8 +38,8 @@ frontend:
 backend:
   replicaCount: 1
   image:
-    repository: ""          # e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com/backend
-    tag: "latest"
+    repository: "698387659728.dkr.ecr.ap-south-1.amazonaws.com/backend"          # e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com/backend
+    tag: ""
     pullPolicy: Always
   service:
     type: ClusterIP
